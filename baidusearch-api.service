@@ -1,0 +1,31 @@
+[Unit]
+Description=BaiduSearch API Service
+After=network.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=baidusearch
+Group=baidusearch
+WorkingDirectory=/opt/baidusearch-api
+Environment="PYTHONUNBUFFERED=1"
+Environment="FLASK_ENV=production"
+ExecStart=/usr/local/bin/gunicorn --bind 0.0.0.0:25000 --workers 4 --threads 2 --timeout 120 --access-logfile /var/log/baidusearch-api/access.log --error-logfile /var/log/baidusearch-api/error.log main:app
+Restart=always
+RestartSec=10
+StandardOutput=syslog
+StandardError=syslog
+SyslogIdentifier=baidusearch-api
+# 限制资源使用
+MemoryLimit=512M
+CPUQuota=100%
+
+# 安全设置
+PrivateTmp=true
+NoNewPrivileges=true
+ProtectSystem=strict
+ReadWritePaths=/var/log/baidusearch-api /opt/baidusearch-api/logs
+ProtectHome=true
+
+[Install]
+WantedBy=multi-user.target

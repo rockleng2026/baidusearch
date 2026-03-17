@@ -1,0 +1,31 @@
+version: '3.8'
+
+services:
+  baidusearch-api:
+    build: .
+    container_name: baidusearch-api
+    ports:
+      - "25000:25000"
+    restart: unless-stopped
+    environment:
+      - PYTHONUNBUFFERED=1
+      - FLASK_ENV=production
+      - GUNICORN_WORKERS=4
+      - GUNICORN_THREADS=2
+    volumes:
+      - ./logs:/app/logs
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:25000/brave-search?q=test"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    mem_limit: 512m
+    # 确保容器在后台运行（detached mode）
+    stdin_open: false
+    tty: false
